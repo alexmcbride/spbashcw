@@ -1,5 +1,8 @@
 #! /bin/bash
 
+# Print student name and ID
+echo "Student: Alex McBride (ID: S1715224)"
+
 # Constants
 SIGINT=2
 MAX_DIR_LIMIT=1024 # Bytes
@@ -93,9 +96,6 @@ create_junk_dir()
 
 # Handle SIGINT signal.
 trap "echo \"Total junk files: $total_files\"; exit 0" SIGINT
-
-# Print student name and ID
-echo "Alex McBride (S1715224)"
 
 # Make sure junk directory exists.
 create_junk_dir

@@ -2,7 +2,7 @@
 
 # Constants
 SIGINT=2
-MAX_SIZE=1024 # KBs
+MAX_DIR_LIMIT=1024 # Bytes
 USAGE="usage: $0 <fill in correct usage>" 
 JUNK_DIR=~/.junkdir
 
@@ -10,14 +10,75 @@ JUNK_DIR=~/.junkdir
 total_files=0
 
 # Functions
-command_list()
+check_junk_dir_limit()
 {
-	ls $JUNK_DIR
+	# Warn if junk directory size goes over limit
+	bytes=$(du -sb $JUNK_DIR | cut -f1)
+	if [ $bytes -gt $MAX_DIR_LIMIT ]
+	then
+		echo "Warning: junk directory size greater than $MAX_DIR_LIMIT bytes ($bytes bytes)" 1>&2
+	fi
+}
+
+junk_file()
+{
+	# TODO: readable files?
+	# Move file to junk directory
+	if [ -d $1 ]
+	then
+		echo "Error: can't junk directory" 1>&2
+	elif [ -f $1 ]
+	then
+		dest_path="$JUNK_DIR/$1"
+		mv $1 $dest_path
+		echo "File '$1' junked!"
+		check_junk_dir_limit
+	else
+		echo "Error: '$1' does not exist" 1>&2
+	fi
+}
+
+list()
+{
+	# List files in junk dir.
+	echo "List of junked files:"
+	ls -l $JUNK_DIR
 }
 
 recover()
 {
+	# Move specified file out of junk directory
+	source_path="$JUNK_DIR/$1"
+	if [ -f $source_path ]
+	then
+		mv $source_path $1
+		echo "File '$1' restored"
+	else
+		echo "Error: '$1' does not exist" 1>&2
+	fi
+}
 
+recover_prompt()
+{
+	# Ask user which file to recover
+	echo -n "Enter file to restore: "
+	read filename
+	recover $filename
+}
+
+delete()
+{
+	# loop through files in junk
+	# check if want to delete
+	# if yes delete
+	# else no
+	echo 'Delete'
+}
+
+total()
+{
+	# get junk dir size for all users
+	echo 'Total'
 }
 
 create_junk_dir()
@@ -43,8 +104,8 @@ create_junk_dir
 while getopts :lr:dtwk args #options
 do
   case $args in
-     l) echo "l option"; command_list;;
-     r) echo "r option; data: $OPTARG";;
+     l) list;;
+     r) recover $OPTARG;;
      d) echo "d option";; 
      t) echo "t option";; 
      w) echo "w option";; 
@@ -64,8 +125,8 @@ if (( $# == 0 ))
 then if (( $OPTIND == 1 )) 
  then select menu_list in list recover delete total watch kill exit
       do case $menu_list in
-         "list") echo "l"; command_list;;
-         "recover") echo "r";;
+         "list") list;;
+         "recover") recover_prompt;;
          "delete") echo "d";;
          "total") echo "t";;
          "watch") echo "w";;
@@ -75,7 +136,8 @@ then if (( $OPTIND == 1 ))
          esac
       done
  fi
-else echo "extra args??: $@"
+else
+	junk_file $1
 fi
 
 

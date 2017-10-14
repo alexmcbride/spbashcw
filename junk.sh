@@ -37,6 +37,7 @@ junk_files()
 		elif [ -f $file ]
 		then
 			dest_path="$JUNK_DIR/$file"
+			# TODO: check dest exists, ask if want to replace or no?
 			mv $file $dest_path
 			moved_count=$((moved_count+1))
 		else
@@ -61,8 +62,18 @@ junk_files()
 list()
 {
 	# List files in junk dir.
-	echo "List of junked files:"
-	ls -l $JUNK_DIR
+	files=$(ls $JUNK_DIR | cut -f1)
+	echo 'Name | Bytes | Type'	
+	echo '---- | ----- | ----'
+	for file in $files
+	do
+		path=$JUNK_DIR/$file
+		size=$(du $path -b | cut -f1)
+		name=$(basename $path)
+		_type=$(file $path | cut -d':' -f2)
+
+		echo "$name | $size | $_type"
+	done
 }
 
 recover()

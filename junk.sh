@@ -23,26 +23,39 @@ create_junk_dir()
 	fi
 }
 
+move_file()
+{
+	# Performs various checks before moving a file.
+	# Returns boolean indicating if move was successful.
+	if [ ! -f $1 ]
+	then
+		echo "Error: source file '$1' does not exist" 1>&2
+	elif [ -d $1 ]
+	then
+		echo "Error: source '$1' is directory" 1>&2
+	elif [ -f $2 ]
+	then
+		echo "Error: junked file '$2' already exists" 1>&2
+	elif [ ! -r $1 ]
+	then
+		echo "Error: source file '$1' is not readable" 1>&2
+	else
+		return $(mv $1 $2)
+	fi
+	return 1
+}
+
 junk_files()
 {
-	# TODO: readable files?
 	# Move file to junk directory
 	moved_count=0
-
 	for file in $@
 	do
-		if [ -d $file ]
+		dest_path=$JUNK_DIR/$file
+		if move_file $file $dest_path
 		then
-			echo "Error: can't junk directory '$file'" 1>&2
-		elif [ -f $file ]
-		then
-			dest_path="$JUNK_DIR/$file"
-			# TODO: check dest exists, ask if want to replace or no?
-			mv $file $dest_path
 			moved_count=$((moved_count+1))
-		else
-			echo "Error: '$file' does not exist" 1>&2
-		fi
+		fi		
 	done
 
 	# Output success message
@@ -79,10 +92,10 @@ list()
 recover()
 {
 	# Move specified file out of junk directory
+
 	source_path="$JUNK_DIR/$1"
-	if [ -f $source_path ]
+	if move_file $source_path $1
 	then
-		mv $source_path $1
 		echo "File '$1' recovered"
 	else
 		echo "Error: '$1' does not exist" 1>&2

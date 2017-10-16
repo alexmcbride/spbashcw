@@ -18,14 +18,18 @@ create_junk_dir()
 	# Create junk directory if does not exist
 	if [ ! -d $JUNK_DIR ]
 	then
-		mkdir $JUNK_DIR
-		echo "Created junk directory '$JUNK_DIR'"
+		if mkdir $JUNK_DIR
+		then
+			echo "Created junk directory '$JUNK_DIR'"
+		else
+			exit 1
+		fi
 	fi
 }
 
 move_file()
 {
-	# Performs various checks before moving a file.
+	# Performs various checks and then moves a file.
 	# Returns boolean indicating if move was successful.
 	if [ ! -f $1 ]
 	then
@@ -43,6 +47,16 @@ move_file()
 		return $(mv $1 $2)
 	fi
 	return 1
+}
+
+check_junk_dir_size()
+{
+	# Warn if junk directory size goes over limit
+	bytes=$(du -sb $JUNK_DIR | cut -f1)
+	if [ $bytes -gt $JUNK_DIR_LIMIT ]
+	then
+		echo "Warning: junk directory size greater than $JUNK_DIR_LIMIT bytes ($bytes bytes)" 1>&2
+	fi
 }
 
 junk_files()
@@ -64,12 +78,7 @@ junk_files()
 		echo "Junk: $moved_count file(s) moved to junk directory!"
 	fi
 
-	# Warn if junk directory size goes over limit
-	bytes=$(du -sb $JUNK_DIR | cut -f1)
-	if [ $bytes -gt $JUNK_DIR_LIMIT ]
-	then
-		echo "Warning: junk directory size greater than $JUNK_DIR_LIMIT bytes ($bytes bytes)" 1>&2
-	fi
+	check_junk_dir_size
 }
 
 list()
@@ -94,7 +103,6 @@ list()
 recover()
 {
 	# Move specified file out of junk directory
-
 	source_path="$JUNK_DIR/$1"
 	if move_file $source_path $1
 	then
@@ -139,8 +147,8 @@ do
 	case $args in
 		l) list;;
 		r) recover $OPTARG;;
-		d) echo "d option";; 
-		t) echo "t option";; 
+		d) delete;; 
+		t) total;; 
 		w) echo "w option";; 
 		k) echo "k option";;     
 		:) echo "data missing, option -$OPTARG";;
@@ -163,8 +171,8 @@ then
 			case $menu_list in
 				"list") list;;
 				"recover") recover_with_prompt;;
-				"delete") echo "d";;
-				"total") echo "t";;
+				"delete") delete;;
+				"total") total;;
 				"watch") echo "w";;
 				"kill") echo "k";;
 				"exit") exit 0;;

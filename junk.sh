@@ -76,17 +76,19 @@ list()
 {
 	# List files in junk dir.
 	files=$(ls $JUNK_DIR | cut -f1)
-	echo 'Name | Bytes | Type'	
-	echo '---- | ----- | ----'
+	echo "Junk directory list:"
+	echo "================================================"
+	printf "|  %12s  |  %8s  |  %12s  |\n" "NAME" "BYTES" "TYPE"
+	echo "================================================"
 	for file in $files
 	do
 		path=$JUNK_DIR/$file
 		size=$(du $path -b | cut -f1)
 		name=$(basename $path)
 		_type=$(file $path | cut -d':' -f2)
-
-		echo "$name | $size | $_type"
+		printf "|  %12s  |  %8s  |  %12s  |\n" "$name" "$size" "$_type"
 	done
+	echo "================================================"
 }
 
 recover()

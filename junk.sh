@@ -81,27 +81,41 @@ junk_files()
 	check_junk_dir_size
 }
 
+count_files()
+{
+	# Returns number of files in specified directory
+	echo $(($(ls -l $1 | wc -l) -1))
+}
+
+count_junk_files()
+{
+	echo $(count_files $JUNK_DIR)
+}
+
 list()
 {
 	# List files in junk dir.
-	files=$(ls $JUNK_DIR | cut -f1)
-	echo "Junk directory list:"
-	echo "================================================"
-	printf "|  %12s  |  %8s  |  %12s  |\n" "NAME" "BYTES" "TYPE"
-	echo "================================================"
-	for file in $files
-	do
-		path=$JUNK_DIR/$file
-		size=$(du $path -b | cut -f1)
-		name=$(basename $path)
-		_type=$(file $path | cut -d':' -f2)
-		printf "|  %12s  |  %8s  |  %12s  |\n" "$name" "$size" "$_type"
-	done
-	echo "================================================"
+	count=$(count_junk_files)
+	echo "Junk directory list: $count file(s)"
+	if [ $count -gt 0 ]
+	then
+		echo "================================================"
+		printf "|  %12s  |  %8s  |  %12s  |\n" "NAME" "BYTES" "TYPE"
+		echo "================================================"
+		for file in $JUNK_DIR/*
+		do
+			size=$(du $file -b | cut -f1)
+			name=$(basename $file)
+			_type=$(file $file | cut -d':' -f2)
+			printf "|  %12s  |  %8s  |  %12s  |\n" "$name" "$size" "$_type"
+		done
+		echo "================================================"
+	fi
 }
 
 recover()
 {
+	# TODO: multiple files?
 	# Move specified file out of junk directory
 	source_path="$JUNK_DIR/$1"
 	if move_file $source_path $1
@@ -122,11 +136,33 @@ recover_with_prompt()
 
 delete()
 {
-	# loop through files in junk
-	# check if want to delete
-	# if yes delete
-	# else no
-	echo 'Delete'
+	# Interactively delete files in junk directory
+	# TODO: specify files in optargs?
+	total_files=$(count_junk_files)
+	echo "Delete junk directory files ($total_files):"
+	if [ $total_files -eq 0 ]
+	then
+		echo "Error: there are no files to delete" 1>&2
+	else
+		files=($(ls $JUNK_DIR))
+		count=0
+		while [ $count -lt $total_files ]
+		do
+			filename=${files[$count]}
+			echo -n "Delete file '$filename'? (y/n): "
+			read choice
+			case $choice in
+				[yY] | [yY][Ee][Ss] )
+					rm ~/.junkdir/$filename
+					count=$(($count+1))
+	            ;;
+	        	[nN] | [n|N][O|o] )
+	                count=$(($count+1))
+	            ;;
+        		*) echo "Invalid input"
+			esac
+		done
+	fi
 }
 
 total()
@@ -136,7 +172,7 @@ total()
 }
 
 # Handle SIGINT signal.
-trap "echo \"Total junk files: $total_files\"; exit 0" SIGINT
+trap "echo \"Exiting...\"; echo \"Total junk files: $(count_junk_files)\"; exit 0" SIGINT
 
 # Make sure junk directory exists.
 create_junk_dir

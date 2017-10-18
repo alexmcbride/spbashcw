@@ -83,12 +83,13 @@ junk_files()
 
 count_files()
 {
-	# Returns number of files in specified directory
+	# Gets number of files in specified directory
 	echo $(($(ls -l $1 | wc -l) -1))
 }
 
 count_junk_files()
 {
+	# Gets number of files in junk directory
 	echo $(count_files $JUNK_DIR)
 }
 
@@ -140,12 +141,11 @@ delete()
 	# TODO: specify files in optargs?
 	total_files=$(count_junk_files)
 	echo "Delete junk directory files ($total_files):"
-	if [ $total_files -eq 0 ]
+	if [ $total_files -gt 0 ]
 	then
-		echo "Error: there are no files to delete" 1>&2
-	else
 		files=($(ls $JUNK_DIR))
 		count=0
+		deleted_count=0	
 		while [ $count -lt $total_files ]
 		do
 			filename=${files[$count]}
@@ -153,15 +153,20 @@ delete()
 			read choice
 			case $choice in
 				[yY] | [yY][Ee][Ss] )
-					rm ~/.junkdir/$filename
+					rm $JUNK_DIR/$filename
 					count=$(($count+1))
+					deleted_count=$(($deleted_count+1))
 	            ;;
 	        	[nN] | [n|N][O|o] )
 	                count=$(($count+1))
 	            ;;
-        		*) echo "Invalid input"
+        		*) echo "Invalid input" 1>&2
 			esac
 		done
+		if [ $deleted_count -gt 0 ]
+		then
+			echo "Deleted $deleted_count file(s)"
+		fi
 	fi
 }
 
@@ -183,7 +188,7 @@ do
 	case $args in
 		l) list;;
 		r) recover $OPTARG;;
-		d) delete;; 
+		d) delete $OPTARG;; 
 		t) total;; 
 		w) echo "w option";; 
 		k) echo "k option";;     
@@ -219,5 +224,3 @@ then
 else
 	junk_files $@
 fi
-
-

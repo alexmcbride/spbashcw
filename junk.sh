@@ -9,9 +9,6 @@ SIGINT=2
 JUNK_DIR_LIMIT=1024 # Bytes
 JUNK_DIR=~/.junkdir
 
-# Variables
-total_files=0
-
 # Functions
 create_junk_dir()
 {
@@ -49,10 +46,15 @@ move_file()
 	return 1
 }
 
+get_dir_size()
+{
+	echo $(du -sb $1 | cut -f1)
+}
+
 check_junk_dir_size()
 {
 	# Warn if junk directory size goes over limit
-	bytes=$(du -sb $JUNK_DIR | cut -f1)
+	bytes=$(get_dir_size $JUNK_DIR)
 	if [ $bytes -gt $JUNK_DIR_LIMIT ]
 	then
 		echo "Warning: junk directory size greater than $JUNK_DIR_LIMIT bytes ($bytes bytes)" 1>&2
@@ -146,6 +148,7 @@ delete()
 		files=($(ls $JUNK_DIR))
 		count=0
 		deleted_count=0	
+		
 		while [ $count -lt $total_files ]
 		do
 			filename=${files[$count]}
@@ -163,6 +166,7 @@ delete()
         		*) echo "Invalid input" 1>&2
 			esac
 		done
+
 		if [ $deleted_count -gt 0 ]
 		then
 			echo "Deleted $deleted_count file(s)"
@@ -174,6 +178,23 @@ total()
 {
 	# get junk dir size for all users
 	echo 'Total'
+	# get list of users (password file)
+	# loop through users and get size of junk_dir
+	# output user - dir size
+	# output total
+	# if no permission, output just own size
+	user_list=$(cut -d: -f1 /etc/passwd)
+	total_size=0
+	for user in $user_list
+	do
+		junkdir=/home/$user/.junkdir
+		if [ -d $junkdir ]
+		then
+			size=$(get_dir_size $junkdir)
+			total_size=$(($total_size+$size))
+		fi		
+	done
+	echo "Total size: $total_size bytes"
 }
 
 # Handle SIGINT signal.

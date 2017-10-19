@@ -225,7 +225,7 @@ kill_watch()
 	# TODO: look at job control.
 	# Gets the watch script PID and then kills it.
 	pid=$(ps -ef | awk '/[w]atch.sh/{print $2}')
-	echo "Attempting to stop watch.sh (PID: $pid)"
+	echo "Stopping watch.sh script (PID: $pid)"
 	kill -9 $pid
 }
 

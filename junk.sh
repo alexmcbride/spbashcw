@@ -7,7 +7,8 @@ echo "Student: Alex McBride (S1715224)"
 USAGE="usage: $0 <fill in correct usage>" 
 SIGINT=2
 JUNK_DIR_LIMIT=1024 # Bytes
-JUNK_DIR=~/.junkdir
+JUNK_DIR_NAME=.junkdir
+JUNK_DIR=~/$JUNK_DIR_NAME
 
 # Functions
 create_junk_dir()
@@ -177,21 +178,16 @@ delete()
 total()
 {
 	# get junk dir size for all users
-	echo 'Total'
-	# get list of users (password file)
-	# loop through users and get size of junk_dir
-	# output user - dir size
-	# output total
-	# if no permission, output just own size
 	user_list=$(cut -d: -f1 /etc/passwd)
 	total_size=0
 	for user in $user_list
 	do
-		junkdir=/home/$user/.junkdir
-		if [ -d $junkdir ]
+		user_junkdir=/home/$user/$JUNK_DIR_NAME
+		if [ -d $user_junkdir ] && [ -r $user_junkdir ]
 		then
-			size=$(get_dir_size $junkdir)
+			size=$(get_dir_size $user_junkdir)
 			total_size=$(($total_size+$size))
+			echo "$user $size bytes"
 		fi		
 	done
 	echo "Total size: $total_size bytes"

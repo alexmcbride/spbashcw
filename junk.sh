@@ -1,5 +1,11 @@
 #! /bin/bash
 
+# Bash Coursework V1
+# Author: Alex McBride
+# Student ID: S1715224
+# Student Email: AMCBRI206@caledonian.ac.uk
+# Date: 19/10/20187
+
 # Print student name and ID
 echo "Student: Alex McBride (S1715224)"
 
@@ -20,21 +26,21 @@ create_junk_dir()
 		then
 			echo "Created junk directory '$JUNK_DIR'"
 		else
-			exit 1
+			exit 1 # No point continuing if cannot create this...
 		fi
 	fi
 }
 
 move_file()
 {
-	# Performs various checks and then moves a file.
+	# Performs various checks before attempting to move specified file.
 	# Returns boolean indicating if move was successful.
 	if [ ! -f $1 ]
 	then
-		echo "Error: source file '$1' does not exist" 1>&2
+		echo "Error: file '$1' does not exist" 1>&2
 	elif [ -d $1 ]
 	then
-		echo "Error: source '$1' is directory" 1>&2
+		echo "Error: '$1' is directory" 1>&2
 	elif [ -f $2 ]
 	then
 		echo "Error: junked file '$2' already exists" 1>&2
@@ -49,6 +55,7 @@ move_file()
 
 get_dir_size()
 {
+	# Gets size of specified directory in bytes
 	echo $(du -sb $1 | cut -f1)
 }
 
@@ -64,8 +71,9 @@ check_junk_dir_size()
 
 junk_files()
 {
-	# Move file to junk directory
 	moved_count=0
+
+	# Move specified files to junk directory and increment counter.
 	for file in $@
 	do
 		dest_path=$JUNK_DIR/$file
@@ -86,8 +94,13 @@ junk_files()
 
 count_files()
 {
-	# Gets number of files in specified directory
-	echo $(($(ls -l $1 | wc -l) -1))
+	# Counts files in the specified directory, if it exists.
+	if [ -d $1 ]
+	then
+		echo $(($(ls -l $1 | wc -l) -1))
+	else
+		echo "0"
+	fi
 }
 
 count_junk_files()
@@ -98,44 +111,45 @@ count_junk_files()
 
 list()
 {
-	# List files in junk dir.
+	# Lists files in junk dir.
 	count=$(count_junk_files)
 	echo "Junk directory list: $count file(s)"
 	if [ $count -gt 0 ]
 	then
-		echo "================================================"
-		printf "|  %12s  |  %8s  |  %12s  |\n" "NAME" "BYTES" "TYPE"
-		echo "================================================"
+		echo "Name          Bytes          Type"
+		echo "----          -----          ----"
 		for file in $JUNK_DIR/*
 		do
 			size=$(du $file -b | cut -f1)
 			name=$(basename $file)
-			_type=$(file $file | cut -d':' -f2)
-			printf "|  %12s  |  %8s  |  %12s  |\n" "$name" "$size" "$_type"
+			filetype=$(file $file | cut -d':' -f2)
+			printf "%-12s  %-12s  %-12s\n" "$name" "$size" "$filetype"
 		done
-		echo "================================================"
 	fi
 }
 
 recover()
 {
-	# TODO: multiple files?
-	# Move specified file out of junk directory
+	# TODO: multiple files in single command?
+	# Recovers specified file from junk directory
 	source_path="$JUNK_DIR/$1"
 	if move_file $source_path $1
 	then
 		echo "File '$1' recovered"
-	else
-		echo "Error: '$1' does not exist" 1>&2
 	fi
 }
 
 recover_with_prompt()
 {
-	# Ask user which file to recover
-	echo -n "Enter file to recover: "
-	read filename
-	recover $filename
+	# Ask user which file to recover, only show if actually files in junk dir.
+	if [ $(count_junk_files) -gt 0 ]
+	then
+		echo -n "Enter file to recover: "
+		read filename
+		recover $filename
+	else
+		echo "Error: there are no junk files to recover" 1>&2
+	fi
 }
 
 delete()
@@ -143,13 +157,14 @@ delete()
 	# Interactively delete files in junk directory
 	# TODO: specify files in optargs?
 	total_files=$(count_junk_files)
-	echo "Delete junk directory files ($total_files):"
+	echo "Delete junk directory - $total_files file(s):"
 	if [ $total_files -gt 0 ]
 	then
 		files=($(ls $JUNK_DIR))
 		count=0
 		deleted_count=0	
 		
+		# Loop through each file and ask if user wants to delete it.
 		while [ $count -lt $total_files ]
 		do
 			filename=${files[$count]}
@@ -160,14 +175,15 @@ delete()
 					rm $JUNK_DIR/$filename
 					count=$(($count+1))
 					deleted_count=$(($deleted_count+1))
-	            ;;
-	        	[nN] | [n|N][O|o] )
-	                count=$(($count+1))
-	            ;;
-        		*) echo "Invalid input" 1>&2
+				;;
+				[nN] | [n|N][O|o] )
+					count=$(($count+1))
+				;;
+				*) echo "Invalid input" 1>&2
 			esac
 		done
 
+		# Output success message.
 		if [ $deleted_count -gt 0 ]
 		then
 			echo "Deleted $deleted_count file(s)"
@@ -180,21 +196,26 @@ total()
 	# get junk dir size for all users
 	user_list=$(cut -d: -f1 /etc/passwd)
 	total_size=0
+
+	# Loop through each user and try and get the size of their junk directory.
 	for user in $user_list
 	do
 		user_junkdir=/home/$user/$JUNK_DIR_NAME
+		# Check junk dir exists and is readble.
 		if [ -d $user_junkdir ] && [ -r $user_junkdir ]
 		then
 			size=$(get_dir_size $user_junkdir)
 			total_size=$(($total_size+$size))
-			echo "$user $size bytes"
+			#echo "$user $size bytes"
 		fi		
 	done
+
+	# Output message.
 	echo "Total size: $total_size bytes"
 }
 
 # Handle SIGINT signal.
-trap "echo \"Exiting...\"; echo \"Total junk files: $(count_junk_files)\"; exit 0" SIGINT
+trap "echo \"Total junk files: $(count_junk_files)\"; echo \"Exting...\"; exit 0" SIGINT
 
 # Make sure junk directory exists.
 create_junk_dir
@@ -239,5 +260,6 @@ then
 		done
 	fi
 else
+	# Handle junk command.
 	junk_files $@
 fi

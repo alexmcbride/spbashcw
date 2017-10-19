@@ -214,8 +214,23 @@ total()
 	echo "Total size: $total_size bytes"
 }
 
+start_watch()
+{
+	# Starts the watch script.
+	./watch.sh
+}
+
+kill_watch()
+{
+	# TODO: look at job control.
+	# Gets the watch script PID and then kills it.
+	pid=$(ps -ef | awk '/[w]atch.sh/{print $2}')
+	echo "Attempting to stop watch.sh (PID: $pid)"
+	kill -9 $pid
+}
+
 # Handle SIGINT signal.
-trap "echo \"Total junk files: $(count_junk_files)\"; echo \"Exting...\"; exit 0" SIGINT
+trap "echo \"Total junk files: $(count_junk_files)\"; echo \"Exiting...\"; exit 0" SIGINT
 
 # Make sure junk directory exists.
 create_junk_dir
@@ -228,8 +243,8 @@ do
 		r) recover $OPTARG;;
 		d) delete $OPTARG;; 
 		t) total;; 
-		w) echo "w option";; 
-		k) echo "k option";;     
+		w) start_watch;; 
+		k) kill_watch;;     
 		:) echo "data missing, option -$OPTARG";;
 		\?) echo "$USAGE";;
 	esac
@@ -252,8 +267,8 @@ then
 				"recover") recover_with_prompt;;
 				"delete") delete;;
 				"total") total;;
-				"watch") echo "w";;
-				"kill") echo "k";;
+				"watch") start_watch;;
+				"kill") kill_watch;;
 				"exit") exit 0;;
 				*) echo "unknown option";;
 			esac

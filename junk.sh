@@ -37,13 +37,13 @@ move_file()
 	# Returns boolean indicating if move was successful.
 	if [ ! -f $1 ]
 	then
-		echo "Error: file '$1' does not exist" 1>&2
+		echo "Error: source file '$1' does not exist" 1>&2
 	elif [ -d $1 ]
 	then
-		echo "Error: '$1' is directory" 1>&2
+		echo "Error: '$1' is a directory" 1>&2
 	elif [ -f $2 ]
 	then
-		echo "Error: junked file '$2' already exists" 1>&2
+		echo "Error: destination file '$2' already exists" 1>&2
 	elif [ ! -r $1 ]
 	then
 		echo "Error: source file '$1' is not readable" 1>&2
@@ -211,7 +211,7 @@ total()
 	done
 
 	# Output message.
-	echo "Total size: $total_size bytes"
+	echo "Total junk directory size for all users: $total_size bytes"
 }
 
 start_watch()

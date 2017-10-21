@@ -1,10 +1,10 @@
 #! /bin/bash
 
-# Bash Coursework V1
+# Bash Coursework - script for junk command
 # Author: Alex McBride
 # Student ID: S1715224
 # Student Email: AMCBRI206@caledonian.ac.uk
-# Date: 19/10/20187
+# Date: 19/10/2017
 
 # Print student name and ID
 echo "Student: Alex McBride (S1715224)"
@@ -87,9 +87,8 @@ junk_files()
 	if [ $moved_count -gt 0 ]
 	then
 		echo "Junk: $moved_count file(s) moved to junk directory!"
+		check_junk_dir_size	
 	fi
-
-	check_junk_dir_size
 }
 
 count_files()
@@ -216,21 +215,32 @@ total()
 
 start_watch()
 {
+	# TODO: check if already watch script running?
 	# Starts the watch script.
-	./watch.sh
+	./watch.sh $JUNK_DIR
 }
 
 kill_watch()
 {
-	# TODO: look at job control.
-	# Gets the watch script PID and then kills it.
+	# Gets the PIDs for any watch scripts and then kills them.
 	pid=$(ps -ef | awk '/[w]atch.sh/{print $2}')
-	echo "Stopping watch.sh script (PID: $pid)"
-	kill -9 $pid
+	for id in $pid
+	do
+		echo "Stopping watch.sh script (PID: $id)"
+		kill $id
+	done
+}
+
+handle_trap()
+{
+	# Output total file count and then exit.
+	echo "Total junk files: $(count_junk_files)"
+	echo "Exiting..."
+	exit 1
 }
 
 # Handle SIGINT signal.
-trap "echo \"Total junk files: $(count_junk_files)\"; echo \"Exiting...\"; exit 0" SIGINT
+trap handle_trap SIGINT
 
 # Make sure junk directory exists.
 create_junk_dir

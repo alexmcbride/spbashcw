@@ -216,25 +216,14 @@ total()
 
 start_watch()
 {
-	# TODO: check if already watch script running?
 	# Starts the watch script.
 	./watch.sh $JUNK_DIR
 }
 
 kill_watch()
 {
-	# Gets the PIDs for any watch scripts and then kills them.
-	pid=($(ps -ef | awk '/[w]atch.sh/{print $2}'))
-	if [ ${#pid[@]} -eq 0 ]
-	then
-		for id in $pid
-		do
-			echo "Stopping watch.sh script (PID: $id)"
-			kill $id
-		done
-	else
-		echo "Error: no watch scripts running" 1>&2
-	fi
+	# Tell the watch script to kill itself
+	./watch.sh -k
 }
 
 handle_trap()

@@ -2,7 +2,7 @@
 
 # Watch script for junk.sh command. Watches junk directory and notifies of file changes
 
-USAGE="Usage: $0 [DIR]... [OPTION]..."
+USAGE="Usage: $0 [DIR]..."
 watch_pid=
 
 start_watch()
@@ -20,23 +20,6 @@ start_watch()
 	done	
 }
 
-stop_watch()
-{
-	# Stops any running watch scripts.
-	pids=($(ps -ef | awk '/[w]atch.sh/{print $2}'))
-	if [ -n "$pids" ]
-	then
-		for pid in $pids
-		do
-			echo "$pid"
-			echo "Stopping watch.sh script (PID: $pid)"
-			kill $pid
-		done
-	else
-		echo "Error: no watch scripts to kill" 1>&2
-	fi
-}
-
 handle_trap()
 {
 	kill $watch_pid
@@ -44,20 +27,6 @@ handle_trap()
 
 # We need to make sure we kill the watch process when we exit
 trap handle_trap EXIT
-trap "echo \"Stopping watch script\";" SIGINT # Only show message on SIGINT
-
-# Handle options.
-while getopts :k args
-do
-	case $args in
-		k) stop_watch;;
-		\?) echo "$USAGE" 1>&2;;
-	esac
-done
-
-# Remove options.
-((pos = OPTIND - 1))
-shift $pos
 
 # Handle main command.
 if (( $# == 1 ))

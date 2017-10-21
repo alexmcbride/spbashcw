@@ -11,7 +11,6 @@ echo "Student: Alex McBride (S1715224)"
 
 # Constants
 USAGE="usage: $0 <fill in correct usage>" 
-SIGINT=2
 JUNK_DIR_LIMIT=1024 # Bytes
 JUNK_DIR_NAME=.junkdir
 JUNK_DIR=~/$JUNK_DIR_NAME
@@ -220,10 +219,20 @@ start_watch()
 	./watch.sh $JUNK_DIR
 }
 
-kill_watch()
+stop_watch()
 {
-	# Tell the watch script to kill itself
-	./watch.sh -k
+	# Stops any running watch scripts.
+	pids=$(ps -ef | awk '/[w]atch.sh/{print $2}')
+	if [ -n $pids ]
+	then
+		for pid in $pids
+		do
+			echo "Stopping watch.sh script (PID: $pid)"
+			kill $pid
+		done
+	else
+		echo "Error: no watch scripts to kill" 1>&2
+	fi
 }
 
 handle_trap()
@@ -249,7 +258,7 @@ do
 		d) delete $OPTARG;; 
 		t) total;; 
 		w) start_watch;; 
-		k) kill_watch;;     
+		k) stop_watch;;     
 		:) echo "data missing, option -$OPTARG";;
 		\?) echo "$USAGE";;
 	esac
@@ -273,7 +282,7 @@ then
 				"delete") delete;;
 				"total") total;;
 				"watch") start_watch;;
-				"kill") kill_watch;;
+				"kill") stop_watch;;
 				"exit") exit 0;;
 				*) echo "unknown option";;
 			esac

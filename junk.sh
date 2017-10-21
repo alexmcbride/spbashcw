@@ -141,13 +141,14 @@ recover()
 recover_with_prompt()
 {
 	# Ask user which file to recover, only show if actually files in junk dir.
-	if [ $(count_junk_files) -gt 0 ]
+	total_files=$(count_junk_files)
+	if [ $total_files -gt 0 ]
 	then
 		echo -n "Enter file to recover: "
 		read filename
 		recover $filename
 	else
-		echo "Error: there are no junk files to recover" 1>&2
+		echo "Recover junk directory - $total_files file(s):" 1>&2
 	fi
 }
 
@@ -223,12 +224,17 @@ start_watch()
 kill_watch()
 {
 	# Gets the PIDs for any watch scripts and then kills them.
-	pid=$(ps -ef | awk '/[w]atch.sh/{print $2}')
-	for id in $pid
-	do
-		echo "Stopping watch.sh script (PID: $id)"
-		kill $id
-	done
+	pid=($(ps -ef | awk '/[w]atch.sh/{print $2}'))
+	if [ ${#pid[@]} -eq 0 ]
+	then
+		for id in $pid
+		do
+			echo "Stopping watch.sh script (PID: $id)"
+			kill $id
+		done
+	else
+		echo "Error: no watch scripts running" 1>&2
+	fi
 }
 
 handle_trap()

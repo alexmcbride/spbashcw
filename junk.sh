@@ -148,7 +148,7 @@ recover_with_prompt()
 		read filename
 		recover $filename
 	else
-		echo "Recover junk directory - $total_files file(s):" 1>&2
+		echo "Recover junk directory - $total_files file(s)" 1>&2
 	fi
 }
 
@@ -157,7 +157,7 @@ delete()
 	# Interactively delete files in junk directory
 	# TODO: specify files in optargs?
 	total_files=$(count_junk_files)
-	echo "Delete junk directory - $total_files file(s):"
+	echo "Delete junk directory - $total_files file(s)"
 	if [ $total_files -gt 0 ]
 	then
 		files=($(ls $JUNK_DIR))

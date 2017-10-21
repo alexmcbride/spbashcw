@@ -24,10 +24,11 @@ stop_watch()
 {
 	# Stops any running watch scripts.
 	pids=($(ps -ef | awk '/[w]atch.sh/{print $2}'))
-	if [ ${#pids[@]} -eq 0 ]
+	if [ -n "$pids" ]
 	then
 		for pid in $pids
 		do
+			echo "$pid"
 			echo "Stopping watch.sh script (PID: $pid)"
 			kill $pid
 		done
@@ -36,9 +37,14 @@ stop_watch()
 	fi
 }
 
+handle_trap()
+{
+	kill $watch_pid
+}
+
 # We need to make sure we kill the watch process when we exit
-trap "kill $watch_pid;" EXIT
-trap "echo \"Stopping watch script\"; exit 1;" SIGINT # Only show message on SIGINT
+trap handle_trap EXIT
+trap "echo \"Stopping watch script\";" SIGINT # Only show message on SIGINT
 
 # Handle options.
 while getopts :k args

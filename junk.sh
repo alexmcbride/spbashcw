@@ -10,7 +10,7 @@
 echo "Student: Alex McBride (S1715224)"
 
 # Constants
-USAGE="usage: $0 <fill in correct usage>" 
+USAGE="usage: $0 [file...] | [-l | -r file | -d | -t | -w | -k]" 
 JUNK_DIR_LIMIT=1 # KB
 JUNK_DIR_NAME=.junkdir
 JUNK_DIR=~/$JUNK_DIR_NAME

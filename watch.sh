@@ -6,7 +6,7 @@
 # Student Email: AMCBRI206@caledonian.ac.uk
 # Date: 22/10/2017
 
-USAGE="Usage: $0 [DIR]... [-k]"
+USAGE="Usage: $0 [dir] | [-k]"
 watch_pid=
 
 # Starts watching specified directory

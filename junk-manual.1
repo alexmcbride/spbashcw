@@ -27,7 +27,7 @@ Interactively deletes the contents of the junk directory
 Displays the total size of all junk directories on the system
 .B
 .IP \-w
-Starts the watch script that lets you was file events in the junk directory
+Starts the watch script that lets you track file events in the junk directory
 .B
 .IP \-k
 Kills any started watch scripts
@@ -41,9 +41,17 @@ You can junk files by listing them as command arguments:
 .BI file3
 .LP
 To start the script in interactive mode, run it without any arguments.
-.BR ./junk.sh
+.BR ./junk.sh.
 .LP
 To recover a particular file specify the filename with the -r switch.
-.BR ./junk.sh 
+.BR ./junk.sh
 .BI \-r
 .BI file1
+.LP
+To use the watch function open two terminal windows and in the first run the watch command:
+.BR ./junk.sh
+.BI \-w
+.LP
+Then use the second termial to use the junk command. To stop the watch script run the command in the second terminal:
+.BI ./junk.sh
+.BI \-k.

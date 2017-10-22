@@ -21,7 +21,7 @@ OPTIONS
 
        -t     Displays the total size of all junk directories on the system
 
-       -w     Starts the watch script that lets you was  file  events  in  the
+       -w     Starts the watch script that lets you track file events  in  the
 	      junk directory
 
        -k     Kills any started watch scripts
@@ -31,9 +31,15 @@ EXAMPLE
        file1 file2 file3
 
        To start the script in interactive mode, run it without any  arguments.
-       ./junk.sh
+       ./junk.sh.
 
        To  recover  a particular file specify the filename with the -r switch.
        ./junk.sh -r file1
+
+       To use the watch function open two terminal windows and	in  the  first
+       run the watch command: ./junk.sh -w
+
+       Then  use the second termial to use the junk command. To stop the watch
+       script run the command in the second terminal: ./junk.sh -k.
 
 version 1.0		       October 22, 2017 		       junk(1)

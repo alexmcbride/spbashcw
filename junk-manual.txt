@@ -1,14 +1,16 @@
-junk(1) 						  junk man page 						 junk(1)
+junk(1) 			 junk man page			       junk(1)
 
 NAME
-       junk - moves files to junk folder where they can be reviewed before being deleted
+       junk  -	moves  files  to junk folder where they can be reviewed before
+       being deleted
 
 SYNOPSIS
        junk [ file...  ] | [ -l | -r file | -d | -t | -w | -k ]
 
 DESCRIPTION
-       This  manual  page  explains the junk program. This program adds a recycle bin style command to Linux called junk. Junked
-       files are stored in a directory before they are lost forever.
+       This program adds a recycle bin style command  to  Linux  called  junk.
+       Junked  files  are  stored  in  a directory where they can be recovered
+       before they are lost forever.
 
 OPTIONS
        -l     Displays a list of all files in the junk directory
@@ -19,15 +21,19 @@ OPTIONS
 
        -t     Displays the total size of all junk directories on the system
 
-       -w     Starts the watch script that lets you was file events in the junk directory
+       -w     Starts the watch script that lets you was  file  events  in  the
+	      junk directory
 
        -k     Kills any started watch scripts
 
 EXAMPLE
-       You can junk files by listing them as command arguments: junk.sh file1 file2 file3
+       You  can  junk  files  by  listing them as command arguments: ./junk.sh
+       file1 file2 file3
 
-       To start the script in interactive mode, run it without any arguments.  junk.sh
+       To start the script in interactive mode, run it without any  arguments.
+       ./junk.sh
 
-       To recover a particular file, use the following: junk.sh -r file1
+       To  recover  a particular file specify the filename with the -r switch.
+       ./junk.sh -r file1
 
-version 1.0						October 22, 2017						 junk(1)
+version 1.0		       October 22, 2017 		       junk(1)

@@ -11,9 +11,7 @@ junk \- moves files to junk folder where they can be reviewed before being delet
 .br
 
 .SH DESCRIPTION
-This manual page explains the
-.B junk
-program. This program adds a recycle bin style command to Linux called junk. Junked files are stored in a directory before they are lost forever.
+This program adds a recycle bin style command to Linux called junk. Junked files are stored in a directory where they can be recovered before they are lost forever.
 .SH OPTIONS
 .B
 .IP \-l
@@ -37,15 +35,15 @@ Kills any started watch scripts
 .SH EXAMPLE
 .LP
 You can junk files by listing them as command arguments: 
-.BR junk.sh 
+.BR ./junk.sh 
 .BI file1 
 .BI file2 
 .BI file3
 .LP
 To start the script in interactive mode, run it without any arguments.
-.BR junk.sh
+.BR ./junk.sh
 .LP
-To recover a particular file, use the following:
-.BR junk.sh 
+To recover a particular file specify the filename with the -r switch.
+.BR ./junk.sh 
 .BI \-r
 .BI file1

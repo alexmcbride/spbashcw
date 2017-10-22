@@ -1,19 +1,17 @@
 #! /bin/bash
+#
 # Bash Coursework - script for watch command
 # Author: Alex McBride
 # Student ID: S1715224
 # Student Email: AMCBRI206@caledonian.ac.uk
 # Date: 22/10/2017
 
-# Watch script for junk.sh. Starts and stops watch command.
-
 USAGE="Usage: $0 [DIR]... [-k]"
 watch_pid=
 
+# Starts watching specified directory
 start_watch()
 {
-	# Starts watching specified directory
-	echo "Watching junk directory '$1'"
 	watch -n 15 ls $1 &
 	watch_pid=$! # Save PID so we can kill it later
 
@@ -24,9 +22,9 @@ start_watch()
 	done	
 }
 
+# Stops any running watch scripts.
 stop_watch()
 {
-	# Stops any running watch scripts.
 	pids=($(ps -ef | awk '/[w]atch.sh/{print $2}'))
 	for pid in $pids
 	do
@@ -40,9 +38,9 @@ stop_watch()
 	done
 }
 
+# Make sure watch process is always killed when we exited
 handle_trap()
 {
-	# Make sure watch process is always killed when we exited
 	if [[ -n $watch_pid ]]
 	then
 		kill $watch_pid

@@ -1,11 +1,7 @@
-#!/bin/bash
+#! /bin/bash
 
-test()
-{
-	for hmm in $@
-	do
-		echo "$hmm"
-	done
-}
-
-test "hello" "fart"
+pids=($(ps -ef | awk '/[w]atch.sh/{print $2}'))
+for id in $pids
+do
+	echo $id
+done

@@ -221,18 +221,8 @@ start_watch()
 
 stop_watch()
 {
-	# Stops any running watch scripts.
-	pids=$(ps -ef | awk '/[w]atch.sh/{print $2}')
-	if [ -n $pids ]
-	then
-		for pid in $pids
-		do
-			echo "Stopping watch.sh script (PID: $pid)"
-			kill $pid
-		done
-	else
-		echo "Error: no watch scripts to kill" 1>&2
-	fi
+	# Stop watch script.
+	./watch.sh -k
 }
 
 handle_trap()

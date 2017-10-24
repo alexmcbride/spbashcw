@@ -116,8 +116,8 @@ list()
 	echo "Junk directory list: $count file(s)"
 	if [[ $count -gt 0 ]]
 	then
-		echo "Name          KB          Type"
-		echo "----          -----          ----"
+		echo "Name          KB             Type"
+		echo "----------    -----------    ----------"
 		for file in $JUNK_DIR/*
 		do
 			size=$(du $file -ks | cut -f1)
@@ -131,9 +131,9 @@ list()
 # Recovers specified file from junk directory
 recover()
 {
-	# TODO: multiple files in single command?
 	source_path="$JUNK_DIR/$1"
-	if move_file $source_path $1
+	dest_path=./$1
+	if move_file $source_path $dest_path
 	then
 		echo "File '$1' recovered"
 	fi
@@ -149,16 +149,15 @@ recover_with_prompt()
 		read filename
 		recover $filename
 	else
-		echo "Recover junk directory - $total_files file(s)" 1>&2
+		echo "Recover junk directory: $total_files file(s)" 1>&2
 	fi
 }
 
 # Interactively delete files in junk directory
 delete()
 {
-	# TODO: specify files in optargs?
 	total_files=$(count_junk_files)
-	echo "Delete junk directory - $total_files file(s)"
+	echo "Delete junk directory: $total_files file(s)"
 	if [[ ! -w $JUNK_DIR  ]]
 	then
 		echo "Error: junk dir '$JUNK_DIR' is not writable" 1>&2
@@ -234,6 +233,7 @@ stop_watch()
 # Output total file count and then exit.
 handle_trap()
 {
+	echo
 	echo "Total junk files: $(count_junk_files)"
 	echo "Exiting..."
 	exit 1
@@ -251,7 +251,7 @@ do
 	case $args in
 		l) list;;
 		r) recover $OPTARG;;
-		d) delete $OPTARG;; 
+		d) delete;; 
 		t) total;; 
 		w) start_watch;; 
 		k) stop_watch;;     

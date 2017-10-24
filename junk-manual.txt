@@ -1,7 +1,7 @@
 junk(1) 			 junk man page			       junk(1)
 
 NAME
-       junk  -	moves  files  to junk folder where they can be reviewed before
+       junk  -	moves  files  to junk folder where they can be recovered before
        being deleted
 
 SYNOPSIS
@@ -39,7 +39,7 @@ EXAMPLE
        To use the watch function open two terminal windows and	in  the  first
        run the watch command: ./junk.sh -w
 
-       Then  use the second termial to use the junk command. To stop the watch
+       Then  use the second termial for the junk command. To stop the watch
        script run the command in the second terminal: ./junk.sh -k.
 
 version 1.0		       October 22, 2017 		       junk(1)

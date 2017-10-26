@@ -1,53 +1,83 @@
-#! /bin/bash
+#!/bin/bash
 #
-# Bash Coursework - script for watch command
-# Author: Alex McBride
-# Student ID: S1715224
-# Student Email: AMCBRI206@caledonian.ac.uk
-# Date: 22/10/2017
-
+UPDATE_SECONDS=15
 USAGE="Usage: $0 [dir] | [-k]"
-watch_pid=
 
-# Starts watching specified directory
-start_watch()
+# Hash table to store files and their hashes
+declare -A file_map
+
+# Create an hash sum of the specified file.
+create_hash()
 {
-	watch -n 15 ls $1 &
-	watch_pid=$! # Save PID so we can kill it later
-
-	# Keep process running
-	while true
-	do
-		sleep 1
-	done	
+	# SHA1 more robust than MD5
+	echo $(sha1sum $1 | cut -d' ' -f1)
 }
 
-# Stops any running watch scripts.
+# Check for changes to directory
+check_directory()
+{
+	files=$(ls $1)
+	for file in $files; do
+		# If file in map then check hash sum, otherwise add to map
+		if [ ${file_map[$file]+_} ]; then
+			old_hash=${file_map[$file]}
+			new_hash=$(create_hash "$1/$file")
+			if [ $old_hash == $new_hash ]; then
+				# Hashes still match, all is well.
+				echo "$file (unchanged)"
+			else
+				# Hash different, file has changed.
+				echo "$file (updated)"
+				file_map[$file]=$new_hash
+			fi
+		else
+			echo "$file (added)"
+			file_map[$file]=$(create_hash "$1/$file")
+		fi
+	done
+
+	# Remove any files from map that are no longer in directory
+	for i in "${!file_map[@]}"
+	do
+		found=1
+		for file in $files; do
+			if [ $file == $i ]; then
+				found=0
+			fi
+		done
+
+		if [ $found -eq 1 ]; then
+	  		unset file_map[$i]
+	  		echo "$file (removed)"
+		fi
+	done
+
+	echo "---- Updates every $UPDATE_SECONDS seconds ----"
+}
+
+# Loop and check directory every interval
+start_watch()
+{
+	while true; do
+		check_directory $1
+
+		sleep $UPDATE_SECONDS
+	done
+}
+
+# Stop all instances of this script.
 stop_watch()
 {
 	pids=($(ps -ef | awk '/[w]atch.sh/{print $2}'))
 	for pid in $pids
 	do
-		# Ignore this script.
 		if [[ $pid -ne $$ ]]
 		then
-			# Stop script
 			echo "Stopping watch.sh script (PID: $pid)"
 			kill $pid
 		fi
 	done
 }
-
-# Make sure watch process is always killed when we exited
-handle_trap()
-{
-	if [[ -n $watch_pid ]]
-	then
-		kill $watch_pid
-	fi
-}
-
-trap handle_trap EXIT
 
 # Handle options
 while getopts :k args
@@ -71,4 +101,3 @@ then
 else
     echo "$USAGE" 1>&2
 fi
-

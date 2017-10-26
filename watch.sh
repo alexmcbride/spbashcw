@@ -1,42 +1,34 @@
 #!/bin/bash
-#
+
 UPDATE_SECONDS=15
 USAGE="Usage: $0 [dir] | [-k]"
 
-# Hash table to store files and their hashes
 declare -A file_map
-# Starts watching specified directory
-# Create an hash sum of the specified file.
+
 create_hash()
 {
-	# SHA1 more robust than MD5
 	echo $(sha1sum $1 | cut -d' ' -f1)
 }
 
-# Check for changes to directory
 check_directory()
 {
 	files=$(ls $1)
 	for file in $files; do
-		# If file in map then check hash sum, otherwise add to map
 		if [ ${file_map[$file]+_} ]; then
 			old_hash=${file_map[$file]}
 			new_hash=$(create_hash "$1/$file")
 			if [ $old_hash == $new_hash ]; then
-				# Hashes still match, all is well.
-				echo "No change to '$file'"
+				echo "$file (unchanged)"
 			else
-				# Hash different, file has changed.
-				echo "Updated '$file'"
+				echo "$file (updated)"
 				file_map[$file]=$new_hash
 			fi
 		else
-			echo "Added '$file'"
+			echo "$file (added)"
 			file_map[$file]=$(create_hash "$1/$file")
 		fi
 	done
 
-	# Remove any files from map that are no longer in directory
 	for i in "${!file_map[@]}"
 	do
 		found=1
@@ -48,18 +40,15 @@ check_directory()
 
 		if [ $found -eq 1 ]; then
 	  		unset file_map[$i]
-	  		echo "Removed file '$i'"
+	  		echo "$file (removed)"
 		fi
 	done
-
-	# Columns with A/R/M/X column notes
 
 	echo "---- Updates every $UPDATE_SECONDS seconds ----"
 }
 
 start_watch()
 {
-	# Check directory every interval
 	while true; do
 		check_directory $1
 

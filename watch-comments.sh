@@ -22,6 +22,7 @@ check_directory()
 		if [ ${file_map[$file]+_} ]; then
 			old_hash=${file_map[$file]}
 			new_hash=$(create_hash "$1/$file")
+			
 			if [ $old_hash == $new_hash ]; then
 				# Hashes still match, all is well.
 				echo "$file (unchanged)"
@@ -69,10 +70,8 @@ start_watch()
 stop_watch()
 {
 	pids=($(ps -ef | awk '/[w]atch.sh/{print $2}'))
-	for pid in $pids
-	do
-		if [[ $pid -ne $$ ]]
-		then
+	for pid in $pids; do
+		if [[ $pid -ne $$ ]]; then
 			echo "Stopping watch.sh script (PID: $pid)"
 			kill $pid
 		fi
@@ -80,8 +79,7 @@ stop_watch()
 }
 
 # Handle options
-while getopts :k args
-do
+while getopts :k args; do
 	case $args in
 		k)  stop_watch
 			exit 0
@@ -95,8 +93,7 @@ done
 shift $pos 
 
 # Handle main command
-if (( $# == 1 ))
-then 
+if (( $# == 1 )); then 
 	start_watch $1
 else
     echo "$USAGE" 1>&2

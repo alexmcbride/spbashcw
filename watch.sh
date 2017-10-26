@@ -1,11 +1,11 @@
 #!/bin/bash
-
+#
 UPDATE_SECONDS=15
 USAGE="Usage: $0 [dir] | [-k]"
 
 # Hash table to store files and their hashes
 declare -A file_map
-
+# Starts watching specified directory
 # Create an hash sum of the specified file.
 create_hash()
 {
@@ -67,23 +67,19 @@ start_watch()
 	done
 }
 
-# Stops any running watch scripts.
 stop_watch()
 {
 	pids=($(ps -ef | awk '/[w]atch.sh/{print $2}'))
 	for pid in $pids
 	do
-		# Ignore this script.
 		if [[ $pid -ne $$ ]]
 		then
-			# Stop script
 			echo "Stopping watch.sh script (PID: $pid)"
 			kill $pid
 		fi
 	done
 }
 
-# Handle options
 while getopts :k args
 do
 	case $args in
@@ -94,11 +90,9 @@ do
 	esac
 done		
 
-# Removed processed options
 ((pos = OPTIND - 1))
 shift $pos 
 
-# Handle main command
 if (( $# == 1 ))
 then 
 	start_watch $1

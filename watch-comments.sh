@@ -49,11 +49,11 @@ check_directory()
 
 		if [ $found -eq 1 ]; then
 	  		unset file_map[$i]
-	  		echo "$file (removed)"
+	  		echo "$1 (removed)"
 		fi
 	done
 
-	echo "---- Updates every $UPDATE_SECONDS seconds ----"
+	echo "---- $UPDATE_SECONDS seconds ----"
 }
 
 # Loop and check directory every interval
